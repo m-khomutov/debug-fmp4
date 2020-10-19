@@ -1,45 +1,41 @@
 #ifndef SAMPLEDESCRIPTIONBOX_HH
 #define SAMPLEDESCRIPTIONBOX_HH
 
-#include <fstream>
+#include "atom.h"
 #include <vector>
 #include <memory>
 
-class SampleEntry {
+class SampleEntry : public Atom {
 public:
-    SampleEntry( std::ifstream& f, uint32_t sz );
+    SampleEntry( std::istream& f, const std::string & fmt );
     virtual ~SampleEntry() = default;
 
-    virtual std::ostream& print( std::ostream& out ) = 0;
-
-    uint32_t size() const {
-        return m_size;
-    }
+protected:
+    std::string m_format;
+    uint16_t m_dataReferenceIndex;
 
 protected:
-    uint32_t m_size{0};
-    std::string m_format;
+    void fout( std::ostream& out ) const override;
 
-    uint16_t m_dataReferenceIndex;
+    friend class SampleDescriptionBox;
 };
 
 
 class HintSampleEntry : public SampleEntry {
 public:
-    HintSampleEntry( std::ifstream& f, uint32_t sz );
-
-    std::ostream& print( std::ostream& out ) override;
+    HintSampleEntry( std::istream& f );
 
 private:
     std::vector< uint8_t > m_data;
+
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 
 class VisualSampleEntry : public SampleEntry {
 public:
-    VisualSampleEntry( std::ifstream& f, uint32_t sz );
-
-    std::ostream& print( std::ostream& out ) override;
+    VisualSampleEntry( std::istream& f );
 
 private:
     uint16_t m_width;
@@ -51,27 +47,30 @@ private:
     uint16_t m_frameCount{1};
     char m_compressorname[ 33 ];
     uint16_t m_depth{0x0018};
+
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 
 class AudioSampleEntry : public SampleEntry {
 public:
-    AudioSampleEntry( std::ifstream& f, uint32_t sz );
-
-    std::ostream& print( std::ostream& out ) override;
+    AudioSampleEntry( std::istream& f );
 
 private:
     uint16_t m_channelcount;
     uint16_t m_samplesize;
     uint32_t m_samplerate;
+
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 
 
-class SampleDescriptionBox
-{
+class SampleDescriptionBox : public Atom {
 public:
-    SampleDescriptionBox( std::ifstream& f, uint32_t sz, const std::string& handler_type );
+    SampleDescriptionBox( std::istream& f, const std::string& handler_type );
 
 private:
     uint8_t m_version;
@@ -79,7 +78,8 @@ private:
 
     std::vector< std::shared_ptr< SampleEntry > > m_entries;
 
-    friend std::ostream & operator <<( std::ostream& out, const SampleDescriptionBox& stsd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // SAMPLEDESCRIPTIONBOX_HH

@@ -7,25 +7,8 @@
 #include <iostream>
 #include <iomanip>
 
-std::ostream & operator <<( std::ostream& out, const MediaDataBox& mdat ) {
-
-    out << "vdata(type:size:offset) : {\n";
-    for( auto nalu : mdat.m_nalu_vector )
-        out << int(nalu.type) << ":" << nalu.size << ":" << nalu.offset << " ";
-    out << "\n}\nadata(size:offset:start) : {\n";
-    for( auto pack : mdat.m_pack_vector ) {
-        out << pack.size << ":" << pack.offset << "[ ";
-	for( uint32_t i(0); i < (pack.size > sizeof(pack.data) ? sizeof(pack.data) : pack.size); ++i )
-            out << std::hex << std::setfill( '0' ) << std::setw( 2 ) << int(pack.data[i]) << ' ' << std::dec;	
-        out << "]\n";
-    }
-    out << "}";
-
-    return out;
-}
-
-MediaDataBox::MediaDataBox( std::ifstream &f, size_t moof_position, const TrunMap & trun_map, uint32_t sz ) : m_datasz( sz - 8 ) {
-    size_t pos = f.tellg();
+MediaDataBox::MediaDataBox( std::istream& is, size_t moof_position, const TrunMap & trun_map ) : Atom( is ) {
+    size_t pos = is.tellg();
 
 /*    std::vector< uint8_t > v(m_dataSize);
     f.read((char*)v.data(), v.size());
@@ -42,29 +25,29 @@ MediaDataBox::MediaDataBox( std::ifstream &f, size_t moof_position, const TrunMa
     TrunMap::const_iterator trun_iter = trun_map.begin();
     if( trun_iter != trun_map.end() ) {
         for( auto sample : *(trun_iter->second) ) {
-            size_t p = f.tellg();
-	    f.read( u.buffer, sizeof(u.buffer) );
+            size_t p = is.tellg();
+	    is.read( u.buffer, sizeof(u.buffer) );
             
 	    uint32_t nalusz = be32toh(u.value);
-	    char c = f.get();
+	    char c = is.get();
 	    m_nalu_vector.push_back( Nalu( (c>>1)&0x3f, nalusz, p ) );
 	    fprintf( stderr, "SIZE: %d - %d\n", sample.size(), nalusz );
 	    off += sizeof(u.buffer) + nalusz;
-            f.seekg( pos + off );
+            is.seekg( pos + off );
         }
         std::advance( trun_iter, 1 );
         if( trun_iter != trun_map.end() ) {
             for( auto sample : *(trun_iter->second) ) {
-	        m_pack_vector.push_back( AudioPack( sample.size(), f.tellg() ) );
-	        for( uint32_t i(0); i < (sample.size() > sizeof(AudioPack::data) ? sizeof(AudioPack::data) : sample.size()); ++i )
-                    m_pack_vector.back().data[i] = f.get();
-	        off += sample.size();
-                f.seekg( pos + off );
-	    }
+	            m_pack_vector.push_back( AudioPack( sample.size(), is.tellg() ) );
+	            for( uint32_t i(0); i < (sample.size() > sizeof(AudioPack::data) ? sizeof(AudioPack::data) : sample.size()); ++i )
+                    m_pack_vector.back().data[i] = is.get();
+	            off += sample.size();
+                is.seekg( pos + off );
+	        }
         }
     }
     std::cerr << "OFF: " << off << "DATASZ: " << m_datasz << std::endl;
-    f.seekg( pos + m_datasz );
+    is.seekg( pos + m_datasz );
 
 /*    uint32_t off = 0;
     while( off < m_dataSize ) {
@@ -107,6 +90,20 @@ MediaDataBox::MediaDataBox( std::ifstream &f, size_t moof_position, const TrunMa
         std::cerr << sz << " -- " << datasz << "." << frame_size << std::endl;
     }*/
     //f.seekg( pos + (sz - 8) );
+}
+
+void MediaDataBox::fout( std::ostream &out ) const {
+    out << "vdata(type:size:offset) : {\n";
+    for( auto nalu : m_nalu_vector )
+        out << int(nalu.type) << ":" << nalu.size << ":" << nalu.offset << " ";
+    out << "\n}\nadata(size:offset:start) : {\n";
+    for( auto pack : m_pack_vector ) {
+        out << pack.size << ":" << pack.offset << "[ ";
+        for( uint32_t i(0); i < (pack.size > sizeof(pack.data) ? sizeof(pack.data) : pack.size); ++i )
+            out << std::hex << std::setfill( '0' ) << std::setw( 2 ) << int(pack.data[i]) << ' ' << std::dec;
+        out << "]\n";
+    }
+    out << "}";
 }
 
 void MediaDataBox::f_read_frames( std::ifstream &f ) {

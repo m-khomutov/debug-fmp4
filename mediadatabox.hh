@@ -10,9 +10,9 @@
 #include "vector"
 #include <fstream>
 
-class MediaDataBox {
+class MediaDataBox : public Atom {
 public:
-    MediaDataBox( std::ifstream & f, size_t moof_position, const TrunMap & trun_map, uint32_t sz );
+    MediaDataBox( std::istream & is, size_t moof_position, const TrunMap & trun_map );
 
 private:
     struct Nalu {
@@ -37,7 +37,8 @@ private:
     void f_read_frames( std::ifstream &f );
     void f_show_frame( uint8_t *start, size_t size );
 
-    friend std::ostream & operator <<( std::ostream& out, const MediaDataBox& mdat );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 

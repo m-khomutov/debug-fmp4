@@ -1,12 +1,11 @@
 #ifndef MEDIAHEADERBOX_HH
 #define MEDIAHEADERBOX_HH
 
-#include <fstream>
+#include "atom.h"
 
-class MediaHeaderBox
-{
+class MediaHeaderBox : public Atom {
 public:
-    MediaHeaderBox( std::ifstream & f, uint32_t sz );
+    MediaHeaderBox( std::istream & f, uint32_t sz );
 
 private:
     uint8_t m_version;
@@ -19,7 +18,8 @@ private:
 
     char m_language[ 3 ];
 
-    friend std::ostream & operator <<( std::ostream& out, const MediaHeaderBox& mdhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // MEDIAHEADERBOX_HH

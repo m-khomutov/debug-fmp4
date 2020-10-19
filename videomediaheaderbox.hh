@@ -1,12 +1,11 @@
 #ifndef VIDEOMEDIAHEADERBOX_HH
 #define VIDEOMEDIAHEADERBOX_HH
 
-#include <fstream>
+#include "atom.h"
 
-class VideoMediaHeaderBox
-{
+class VideoMediaHeaderBox : public Atom {
 public:
-    VideoMediaHeaderBox(  std::ifstream & f, uint32_t sz );
+    VideoMediaHeaderBox(  std::istream & is, uint32_t sz );
 
 private:
     uint8_t m_version;
@@ -15,7 +14,8 @@ private:
     uint16_t m_graphicsmode{0};
     uint16_t m_opcolor[3]{0, 0, 0};
 
-    friend std::ostream & operator <<( std::ostream& out, const VideoMediaHeaderBox& vmhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // VIDEOMEDIAHEADERBOX_HH

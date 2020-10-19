@@ -1,13 +1,12 @@
 #ifndef TIMETOSAMPLEBOX_HH
 #define TIMETOSAMPLEBOX_HH
 
-#include <fstream>
+#include "atom.h"
 #include <vector>
 
-class TimeToSampleBox
-{
+class TimeToSampleBox : public Atom {
 public:
-    TimeToSampleBox( std::ifstream& f, uint32_t sz );
+    TimeToSampleBox( std::istream& f );
 
 private:
     uint8_t m_version;
@@ -15,7 +14,8 @@ private:
 
     std::vector< std::pair< uint32_t /*sample_count*/, uint32_t/*sample_delta*/ > > m_entries;
 
-    friend std::ostream & operator <<( std::ostream& out, const TimeToSampleBox& stts );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // TIMETOSAMPLEBOX_HH

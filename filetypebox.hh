@@ -1,14 +1,16 @@
 #ifndef FILETYPEBOX_HH
 #define FILETYPEBOX_HH
 
+#include "atom.h"
+
 #include <fstream>
 #include <string>
 #include <vector>
 
-class FileTypeBox
+class FileTypeBox : public Atom
 {
 public:
-    FileTypeBox( std::ifstream & f, uint32_t sz );
+    FileTypeBox( std::istream & f, uint32_t sz );
 
 private:
     std::string m_majorBrand;
@@ -16,7 +18,8 @@ private:
 
     std::vector< std::string > m_compatibleBrands;
 
-    friend std::ostream & operator <<( std::ostream& out, const FileTypeBox& ftyp );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // FILETYPEBOX_HH

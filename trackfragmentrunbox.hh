@@ -1,13 +1,13 @@
 #ifndef TRACKFRAGMENTRUNBOX_HH
 #define TRACKFRAGMENTRUNBOX_HH
 
-#include <fstream>
+#include "atom.h"
+
 #include <vector>
 #include <map>
 #include <memory>
 
-class TrackFragmentRunBox
-{
+class TrackFragmentRunBox : public Atom {
 public:
     enum TrackRunFlags {
         kDataOffsetPresent = 0x000001,
@@ -21,7 +21,7 @@ public:
     class Sample {
     public:
         Sample() = default;
-        Sample( std::ifstream& f, uint32_t flags );
+        Sample( std::istream& is, uint32_t flags );
 
         uint32_t trFlags() const {
             return m_trflags;
@@ -39,7 +39,7 @@ public:
             return m_sampleCompositionTimeOffset;
 	}
 
-        std::ostream& print( std::ostream& out );
+    void fout( std::ostream& out );
 
     private:
         uint32_t m_trflags;
@@ -49,7 +49,7 @@ public:
         uint32_t m_sampleCompositionTimeOffset;
     };
 
-    TrackFragmentRunBox( std::ifstream & f, uint32_t sz );
+    TrackFragmentRunBox( std::istream & is );
 
     const Sample & operator[]( int at ) {
         return m_samples[at];
@@ -78,7 +78,8 @@ private:
     // all fields in the following array are optional
     std::vector< Sample > m_samples;
 
-    friend std::ostream & operator <<( std::ostream& out, const TrackFragmentRunBox& mvhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 using TrunMap = std::map< uint32_t/*trackID*/, std::shared_ptr< TrackFragmentRunBox > >;
 

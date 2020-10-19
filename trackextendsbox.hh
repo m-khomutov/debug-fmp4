@@ -1,17 +1,16 @@
 #ifndef TRACKEXTENDSBOX_HH
 #define TRACKEXTENDSBOX_HH
 
-#include <fstream>
+#include "atom.h"
 #include <memory>
 
-class TrackExtendsBox
-{
+class TrackExtendsBox: public Atom {
 public:
     class SampleFlags {
     public:
-        SampleFlags( std::ifstream& f );
+        SampleFlags( std::istream& is );
 
-        std::ostream& print( std::ostream& out );
+        void fout( std::ostream& out );
 
     private:
         uint8_t m_sampleDependsOn;
@@ -24,7 +23,7 @@ public:
         uint16_t m_sampleDegradationPriority;
     };
 
-    TrackExtendsBox( std::ifstream & f, uint32_t sz );
+    TrackExtendsBox( std::istream & is );
 
 private:
     uint8_t m_version;
@@ -36,7 +35,8 @@ private:
     uint32_t m_defaultSampleSize;
     std::shared_ptr< SampleFlags > m_defaultSampleFlags;
 
-    friend std::ostream & operator <<( std::ostream& out, const TrackExtendsBox& trex );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // TRACKEXTENDSBOX_HH

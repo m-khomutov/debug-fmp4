@@ -5,8 +5,11 @@
 #ifndef FMP4VERIFIER_ELEMENTARYSTREAMDESCRIPTORBOX_H
 #define FMP4VERIFIER_ELEMENTARYSTREAMDESCRIPTORBOX_H
 
+#include "atom.h"
+
 #include <vector>
 #include <ostream>
+#include <memory>
 
 /*
  *                http://xhelmboyx.tripod.com/formats/mp4-layout.txt
@@ -69,29 +72,98 @@
     -> 1 byte SL value = 8-bit hex value set to 0x02
 */
 
-class ElementaryStreamDescriptorBox {
+class ElementaryStreamDescriptorBox : public Atom {
 public:
-    ElementaryStreamDescriptorBox( std::ifstream& f, uint32_t sz );
+    class Descriptor {
+    public:
+        enum Tag {
+            kElementaryStream = 3,
+            kDecoderConfig = 4,
+            kDecoderSpecific = 5,
+            kSlConfig = 6
+        };
+
+        static Descriptor* make( std::istream & is );
+
+        Descriptor( Tag tag, uint8_t sz ) : m_tag( tag ),m_size( sz )
+        {}
+        virtual ~Descriptor()
+        {}
+
+        uint8_t size() const {
+            return m_size;
+        }
+
+        virtual void fout( std::ostream& out ) const =0;
+
+    protected:
+        Tag m_tag;
+        uint8_t m_size;
+
+    };
+    class ElementaryStreamDescriptor : public Descriptor {
+    public:
+        ElementaryStreamDescriptor( std::istream& is, uint8_t len );
+
+    private:
+        uint16_t m_id;
+        uint8_t m_priority;
+
+    private:
+        void fout( std::ostream& out ) const override;
+    };
+    class DecoderConfigDescriptor : public Descriptor {
+    public:
+        enum ObjectType {
+            kMPEG4audio = 0x40
+        };
+        enum StreamType {
+            kAudio = 5
+        };
+
+        DecoderConfigDescriptor( std::istream& is, uint8_t len );
+
+    private:
+        uint8_t m_object_type{0};
+        uint8_t m_stream_type{0};
+        bool m_upstream{false};
+        uint32_t m_maximum_bitrate{0};
+        uint32_t m_average_bitrate{0};
+
+    private:
+        void fout( std::ostream& out ) const override;
+    };
+    class DecoderSpecificDescriptor : public Descriptor {
+    public:
+        DecoderSpecificDescriptor( std::istream& is, uint8_t len );
+
+    private:
+        std::vector< uint8_t > m_start_codes;
+
+    private:
+        void fout( std::ostream& out ) const override;
+    };
+    class SlConfigDescriptor : public Descriptor {
+    public:
+        SlConfigDescriptor( std::istream& is, uint8_t len );
+
+    private:
+        uint8_t m_value;
+
+    private:
+        void fout( std::ostream& out ) const override;
+    };
+
+    ElementaryStreamDescriptorBox( std::istream& is );
 
 private:
     uint8_t m_version;
     uint32_t m_flags;
 
-    uint16_t m_esId;
-
-    uint8_t m_objectType{0};
-    uint8_t m_streamType{0};
-    bool m_upstream{false};
-
-    uint32_t m_maximumBitrate{0};
-    uint32_t m_averageBitrate{0};
-    std::vector< uint8_t > m_esHeaderStartCodes;
+    std::vector< std::shared_ptr< Descriptor > > m_descriptors;
 
 private:
-    bool f_get_tag( std::ifstream& f, uint8_t tagType );
-
-    friend std::ostream & operator <<( std::ostream& out, const ElementaryStreamDescriptorBox& stsd );
+    void fout( std::ostream& out ) const override;
 };
 
-
-#endif //FMP4VERIFIER_ELEMENTARYSTREAMDESCRIPTORBOX_H
+#endif  // FMP4VERIFIER_ELEMENTARYSTREAMDESCRIPTORBOX_H

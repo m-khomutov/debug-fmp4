@@ -1,12 +1,11 @@
 #ifndef SOUNDMEDIAHEADERBOX_HH
 #define SOUNDMEDIAHEADERBOX_HH
 
-#include <fstream>
+#include "atom.h"
 
-class SoundMediaHeaderBox
-{
+class SoundMediaHeaderBox : public Atom {
 public:
-    SoundMediaHeaderBox( std::ifstream& f, uint32_t sz );
+    SoundMediaHeaderBox( std::istream& f );
 
 private:
     uint8_t m_version;
@@ -14,7 +13,8 @@ private:
 
     uint16_t m_balance{0};
 
-    friend std::ostream & operator <<( std::ostream& out, const SoundMediaHeaderBox& vmhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // SOUNDMEDIAHEADERBOX_HH

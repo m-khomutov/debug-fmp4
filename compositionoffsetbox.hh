@@ -1,13 +1,12 @@
 #ifndef COMPOSITIONOFFSETBOX_HH
 #define COMPOSITIONOFFSETBOX_HH
 
-#include <fstream>
+#include "atom.h"
 #include <vector>
 
-class CompositionOffsetBox
-{
+class CompositionOffsetBox : public Atom {
 public:
-    CompositionOffsetBox( std::ifstream& f, uint32_t sz );
+    CompositionOffsetBox( std::istream& is );
 
 private:
     uint8_t m_version;
@@ -15,7 +14,8 @@ private:
 
     std::vector< std::pair< uint32_t /*sample_count*/, uint32_t/*sample_offset*/ > > m_entries;
 
-    friend std::ostream & operator <<( std::ostream& out, const CompositionOffsetBox& ctts );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // COMPOSITIONOFFSETBOX_HH

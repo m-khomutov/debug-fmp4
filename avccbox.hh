@@ -1,13 +1,12 @@
 #ifndef AVCCBOX_HH
 #define AVCCBOX_HH
 
-#include <fstream>
+#include "atom.h"
 #include <vector>
 
-class AvcCBox
-{
+class AvcCBox : public Atom {
 public:
-    AvcCBox( std::ifstream& f, uint32_t sz );
+    AvcCBox( std::istream& f );
 
 private:
     uint8_t m_version;       // always 0x01
@@ -19,7 +18,8 @@ private:
     std::vector< std::vector< uint8_t > > m_sps;
     std::vector< std::vector< uint8_t > > m_pps;
 
-    friend std::ostream & operator <<( std::ostream& out, const AvcCBox& stsd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // AVCCBOX_HH

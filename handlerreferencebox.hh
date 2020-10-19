@@ -1,13 +1,11 @@
 #ifndef HANDLERREFERENCEBOX_HH
 #define HANDLERREFERENCEBOX_HH
 
-#include <fstream>
-#include <string>
+#include "atom.h"
 
-class HandlerReferenceBox
-{
+class HandlerReferenceBox : public Atom {
 public:
-    HandlerReferenceBox( std::ifstream & f, uint32_t sz );
+    HandlerReferenceBox( std::istream & is, std::string * type );
 
     const std::string& type() const {
         return m_handlerType;
@@ -20,7 +18,8 @@ private:
     std::string m_handlerType;
     std::string m_name;
 
-    friend std::ostream & operator <<( std::ostream& out, const HandlerReferenceBox& mvhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // HANDLERREFERENCEBOX_HH

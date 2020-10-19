@@ -1,12 +1,11 @@
 #ifndef MOVIEHEADERBOX_HH
 #define MOVIEHEADERBOX_HH
 
-#include <fstream>
+#include "atom.h"
 
-class MovieHeaderBox
-{
+class MovieHeaderBox : public Atom {
 public:
-    MovieHeaderBox( std::ifstream & f, uint32_t sz );
+    MovieHeaderBox( std::istream & f, uint32_t sz );
 
 private:
     uint8_t m_version;
@@ -23,7 +22,8 @@ private:
 
     uint32_t m_nextTrackID;
 
-    friend std::ostream & operator <<( std::ostream& out, const MovieHeaderBox& mvhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // MOVIEHEADERBOX_HH

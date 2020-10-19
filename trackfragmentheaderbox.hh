@@ -1,13 +1,12 @@
 #ifndef TRACKFRAGMENTHEADERBOX_HH
 #define TRACKFRAGMENTHEADERBOX_HH
 
+#include "atom.h"
 #include "trackextendsbox.hh"
 
-#include <fstream>
 #include <memory>
 
-class TrackFragmentHeaderBox
-{
+class TrackFragmentHeaderBox : public Atom {
 public:
     enum {
         kBaseDataOffsetPresent         = 0x000001,
@@ -15,10 +14,11 @@ public:
         kDefaultSampleDurationPresent  = 0x000008,
         kDefaultSampleSizePresent      = 0x000010,
         kDefaultSampleFlagsPresent     = 0x000020,
-        kDurationIsEmpty               = 0x010000
+        kDurationIsEmpty               = 0x010000,
+        kDefaultBaseIsMoof             = 0x020000
     };
 
-    TrackFragmentHeaderBox( std::ifstream & f, uint32_t sz );
+    TrackFragmentHeaderBox( std::istream & is );
 
     uint32_t trackID() const {
         return m_trackID;
@@ -36,7 +36,8 @@ private:
     uint32_t m_defaultSampleSize;
     std::shared_ptr< TrackExtendsBox::SampleFlags > m_defaultSampleFlags;
 
-    friend std::ostream & operator <<( std::ostream& out, const TrackFragmentHeaderBox& mvhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // TRACKFRAGMENTHEADERBOX_HH

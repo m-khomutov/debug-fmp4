@@ -1,21 +1,20 @@
 #ifndef DATAREFERENCEBOX_HH
 #define DATAREFERENCEBOX_HH
 
-#include <fstream>
-#include <string>
+#include "atom.h"
 #include <vector>
 #include <memory>
 
-class DataEntryBox {
+class DataEntryBox : public Atom {
 public:
-    virtual ~DataEntryBox() = default;
+    DataEntryBox( std::istream & is );
 
-    friend std::ostream & operator <<( std::ostream& out, const DataEntryBox& vmhd );
+    virtual ~DataEntryBox() = default;
 };
 
 class DataEntryUrlBox : public DataEntryBox {
 public:
-    DataEntryUrlBox( std::ifstream& f, uint32_t sz );
+    DataEntryUrlBox( std::istream& is );
 
 private:
     uint8_t m_version;
@@ -23,12 +22,13 @@ private:
 
     std::string m_location;
 
-    friend std::ostream & operator <<( std::ostream& out, const DataEntryUrlBox& vmhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 class DataEntryUrnBox : public DataEntryBox {
 public:
-    DataEntryUrnBox( std::ifstream& f, uint32_t sz );
+    DataEntryUrnBox( std::istream& is );
 
 private:
     uint8_t m_version;
@@ -37,13 +37,13 @@ private:
     std::string m_name;
     std::string m_location;
 
-    friend std::ostream & operator <<( std::ostream& out, const DataEntryUrnBox& vmhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
-class DataReferenceBox
-{
+class DataReferenceBox : public Atom {
 public:
-    DataReferenceBox( std::ifstream& f, uint32_t sz );
+    DataReferenceBox( std::istream& f );
 
 private:
     uint8_t m_version;
@@ -51,7 +51,8 @@ private:
 
     std::vector< std::shared_ptr< DataEntryBox > > m_entries;
 
-    friend std::ostream & operator <<( std::ostream& out, const DataReferenceBox& dref );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // DATAREFERENCEBOX_HH

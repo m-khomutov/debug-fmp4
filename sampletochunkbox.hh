@@ -1,18 +1,17 @@
 #ifndef SAMPLETOCHUNK_HH
 #define SAMPLETOCHUNK_HH
 
-#include <fstream>
+#include "atom.h"
 #include <vector>
 #include <memory>
 
-class SampleToChunkBox
-{
+class SampleToChunkBox : public Atom {
 public:
     class Entry {
     public:
-        Entry( std::ifstream& f );
+        Entry( std::istream& is );
 
-        std::ostream& print( std::ostream& out );
+        void fout( std::ostream& out );
 
         uint32_t firstChunk() const {
             return m_firstChunk;
@@ -30,7 +29,7 @@ public:
         uint32_t m_sampleDescriptionIndex;
     };
 
-    SampleToChunkBox( std::ifstream & f, uint32_t sz );
+    SampleToChunkBox( std::istream & is );
 
 private:
     uint8_t m_version;
@@ -38,7 +37,8 @@ private:
 
     std::vector< std::shared_ptr< Entry > > m_entries;
 
-    friend std::ostream & operator <<( std::ostream& out, const SampleToChunkBox& mvhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // SAMPLETOCHUNK_HH

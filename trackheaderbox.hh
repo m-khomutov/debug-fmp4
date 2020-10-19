@@ -1,12 +1,11 @@
 #ifndef TRACKHEADERBOX_HH
 #define TRACKHEADERBOX_HH
 
-#include <fstream>
+#include "atom.h"
 
-class TrackHeaderBox
-{
+class TrackHeaderBox : public Atom {
 public:
-    TrackHeaderBox( std::ifstream & f, uint32_t sz );
+    TrackHeaderBox( std::istream & is, uint32_t sz );
 
 private:
     uint8_t m_version;
@@ -25,8 +24,8 @@ private:
     uint32_t m_width;
     uint32_t m_height;
 
-    friend std::ostream & operator <<( std::ostream& out, const TrackHeaderBox& mvhd );
-
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // TRACKHEADERBOX_HH

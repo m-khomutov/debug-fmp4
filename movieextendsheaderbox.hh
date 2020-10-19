@@ -1,12 +1,11 @@
 #ifndef MOVIEEXTENDSHEADERBOX_HH
 #define MOVIEEXTENDSHEADERBOX_HH
 
-#include <fstream>
+#include "atom.h"
 
-class MovieExtendsHeaderBox
-{
+class MovieExtendsHeaderBox : public Atom {
 public:
-    MovieExtendsHeaderBox( std::ifstream & f, uint32_t sz );
+    MovieExtendsHeaderBox( std::istream & is );
 
 private:
     uint8_t m_version;
@@ -14,7 +13,8 @@ private:
 
     uint64_t m_fragmentDuration;
 
-    friend std::ostream & operator <<( std::ostream& out, const MovieExtendsHeaderBox& mvhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // MOVIEEXTENDSHEADERBOX_HH

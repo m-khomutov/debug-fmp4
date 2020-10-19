@@ -1,13 +1,12 @@
 #ifndef SAMPLESIZEBOX_HH
 #define SAMPLESIZEBOX_HH
 
-#include <fstream>
+#include "atom.h"
 #include <vector>
 
-class SampleSizeBox
-{
+class SampleSizeBox : public Atom {
 public:
-    SampleSizeBox( std::ifstream & f, uint32_t sz );
+    SampleSizeBox( std::istream & is );
 
 private:
     uint8_t m_version;
@@ -17,7 +16,8 @@ private:
     uint32_t m_samplecount;
     std::vector< uint32_t > m_entrysizeVector;
 
-    friend std::ostream & operator <<( std::ostream& out, const SampleSizeBox& mvhd );
+private:
+    void fout( std::ostream& out ) const override;
 };
 
 #endif // SAMPLESIZEBOX_HH
