@@ -25,14 +25,14 @@
 #include "trackfragmentheaderbox.hh"
 #include "elementarystreamdescriptorbox.h"
 #include "trackfragmentrunbox.hh"
+#include "mediadatabox.hh"
 
 std::ostream & operator <<( std::ostream& out, const Atom& atom ) {
     atom.fout( out );
     return out;
 }
 
-
-Atom * Atom::make( std::istream & is ) {
+Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
     static std::string handler_type;
 
     std::unique_ptr< Atom > atom( new Atom( is ) );
@@ -111,6 +111,9 @@ Atom * Atom::make( std::istream & is ) {
         else if( *atom == Atom::trun ) {
             return new TrackFragmentRunBox( is );
         }
+        else if( *atom == Atom::mdat ) {
+            return new MediaDataBox( is, trunMap );
+        }
         else
             is.seekg( atom->position() + std::streampos(atom->size()) );
     }
@@ -163,7 +166,7 @@ bool Atom::container() const {
 }
 
 void Atom::fout( std::ostream &out ) const {
-    out << m_strtype << "(" << std::hex << htobe32(m_type.a) << ") " << std::dec << "size=" << m_size << " pos=" << m_position;
+    out << m_strtype << "(" << std::hex << htobe32(m_type.a) << ") " << std::dec << "size=" << m_size << " position=" << m_position;
 }
 
 void Atom::ctime( std::ostream & out, time_t t ) const {

@@ -6,6 +6,11 @@
 #define DEBUG_MP4_ATOM_H
 
 #include <istream>
+#include <map>
+#include <memory>
+
+class TrackFragmentRunBox;
+using TrunMap = class std::map<unsigned int, std::shared_ptr<TrackFragmentRunBox> >;
 
 class Atom {
 public:
@@ -58,7 +63,7 @@ public:
         udta = 0x61746475
     };
 
-    static Atom * make( std::istream & is );
+    static Atom * make( std::istream & is, const TrunMap & trunMap );
 
     Atom( Value val );
     Atom( std::istream & is );

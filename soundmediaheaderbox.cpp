@@ -1,7 +1,5 @@
 #include "soundmediaheaderbox.hh"
 
-#include <iostream>
-
 SoundMediaHeaderBox::SoundMediaHeaderBox( std::istream& is ) : Atom( is ) {
     uint32_t tmp;
     is.read( (char*)&tmp, sizeof(tmp) );

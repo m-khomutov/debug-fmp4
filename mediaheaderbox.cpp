@@ -1,7 +1,5 @@
 #include "mediaheaderbox.hh"
 
-#include <iostream>
-
 MediaHeaderBox::MediaHeaderBox( std::istream & is, uint32_t sz ) : Atom( is ) {
     uint32_t tmp;
     is.read( (char*)&tmp, sizeof(tmp) );

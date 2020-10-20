@@ -1,7 +1,5 @@
 #include "samplesizebox.hh"
 
-#include <iostream>
-
 SampleSizeBox::SampleSizeBox( std::istream& is ) : Atom( is ) {
     uint32_t tmp;
     is.read( (char*)&tmp, sizeof(tmp) );

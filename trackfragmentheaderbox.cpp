@@ -1,5 +1,4 @@
 #include "trackfragmentheaderbox.hh"
-#include <iostream>
 
 TrackFragmentHeaderBox::TrackFragmentHeaderBox( std::istream & is ) : Atom( is ) {
     uint32_t tmp;
