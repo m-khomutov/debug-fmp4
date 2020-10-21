@@ -22,7 +22,7 @@ CompositionOffsetBox::CompositionOffsetBox( std::istream& is ) : Atom( is ) {
 
 void CompositionOffsetBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
     out << " number of offsets: " << m_entries.size();
     out << " samples(count:offset)={";
     for( auto p : m_entries )

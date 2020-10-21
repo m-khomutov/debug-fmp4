@@ -165,8 +165,18 @@ bool Atom::container() const {
            m_type.a == Atom::udta;
 }
 
+void Atom::setIndent( int indent ) {
+    m_indent = indent;
+}
+
+void Atom::indent( std::ostream &out ) const {
+    for( int i(0); i < m_indent; ++i )
+        out << " ";
+}
+
 void Atom::fout( std::ostream &out ) const {
-    out << m_strtype << "(" << std::hex << htobe32(m_type.a) << ") " << std::dec << "size=" << m_size << " position=" << m_position;
+    indent( out );
+    out << m_strtype << "(" << std::hex << htobe32(m_type.a) << ") " << std::dec << "size=" << m_size << " position=" << m_position << " ";
 }
 
 void Atom::ctime( std::ostream & out, time_t t ) const {

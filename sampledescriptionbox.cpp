@@ -8,7 +8,7 @@ SampleEntry::SampleEntry( std::istream& is, const std::string & fmt ) : Atom( is
 }
 
 void SampleEntry::fout( std::ostream& out ) const {
-    out << " size=" << size() << " format='" << m_format << "' data reference index=" << m_dataReferenceIndex;
+    out << "size=" << size() << " format='" << m_format << "' data reference index=" << m_dataReferenceIndex;
 }
 
 HintSampleEntry::HintSampleEntry( std::istream& is ) : SampleEntry( is, "hint" ) {
@@ -114,10 +114,10 @@ SampleDescriptionBox::SampleDescriptionBox( std::istream& is, const std::string&
 
 void SampleDescriptionBox::fout( std::ostream& out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec << " entries=" << m_entries.size();
-    int it{0};
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec << " entries=" << m_entries.size();
     for( auto entry : m_entries ) {
-        out << "\n\t" << it << ". ";
+        out << "\n";
+        indent( out );
         entry->fout( out );
     }
 }

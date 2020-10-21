@@ -216,7 +216,7 @@ ElementaryStreamDescriptorBox::ElementaryStreamDescriptorBox( std::istream& is )
 
 void ElementaryStreamDescriptorBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec << " ";
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec << " ";
     for( auto d : m_descriptors )
         d->fout( out );
 }

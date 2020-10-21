@@ -16,7 +16,7 @@ VideoMediaHeaderBox::VideoMediaHeaderBox( std::istream& is, uint32_t sz ) : Atom
 
 void VideoMediaHeaderBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
     out << " graphicsmode=" << m_graphicsmode <<  " opcolor={ ";
     for( size_t i(0); i < 3; ++i )
         out << int(m_opcolor[i]) << " ";

@@ -11,5 +11,5 @@ Free::Free( std::istream & is, uint32_t sz ) : Atom( is ),m_content_size( sz - 8
 
 void Free::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\ncontents size=" << m_content_size;
+    out << "contents size=" << m_content_size;
 }

@@ -6,6 +6,51 @@
 #include <fstream>
 #include <iostream>
 
+namespace {
+    class Indent {
+    public:
+        Indent( int step =3 ) : m_step( step ) {}
+
+        operator int() const {
+            return m_items.empty() ? 0 : m_items.back().indent;
+        }
+
+        void add( std::streampos size, std::streampos unserialized ) {
+            int indent = m_items.empty() ? 0 : m_items.back().indent + m_step;
+            m_items.push_back( Item( size, unserialized, indent ) );
+        }
+        void normalize() {
+            if( !m_items.empty() ) {
+                std::vector< Item >::reverse_iterator it = m_items.rbegin();
+                while( it != m_items.rend() ) {
+                    if( it->unserialized == 0 ) {
+                        std::vector< Item >::reverse_iterator next_it = std::next( it );
+                        next_it->unserialized -= it->size;
+                        m_items.erase( it.base() );
+                        it = next_it;
+                    }
+                    else
+                        it++;
+                }
+            }
+        }
+
+    private:
+        struct Item {
+            std::streampos size;
+            std::streampos unserialized;
+            int indent;
+
+            Item() = default;
+            Item( std::streampos s, std::streampos u, int i ) : size( s ),unserialized( u ),indent( i )
+            {}
+        };
+
+        int m_step;
+        std::vector< Item > m_items;
+    };
+}  // namespace
+
 int main( int argc, char* argv[] ) {
     if( argc != 2 ) {
         std::cerr << "run as " << argv[0] << " file to verify\n";
@@ -22,11 +67,16 @@ int main( int argc, char* argv[] ) {
     uint32_t track_id = 0;
     TrunMap trun_map;
     std::unique_ptr< MediaDataBox > data;
+    Indent indent;
 
     while( f.good() ) {
         std::unique_ptr< Atom > atom( Atom::make( f, trun_map ) );
-        std::cout << (*atom) << std::endl;
         if( atom ) {
+            indent.add( atom->size(), std::streampos(atom->size()) - (f.tellg() - atom->position()) );
+            atom->setIndent( indent );
+            indent.normalize();
+
+            std::cout << (*atom) << std::endl;
             if( *atom == Atom::tfhd ) {
                 track_id = static_cast< TrackFragmentHeaderBox* >(atom.get())->trackID();
             }

@@ -32,18 +32,21 @@ AvcCBox::AvcCBox( std::istream& is ) : Atom( is ) {
 void AvcCBox::fout( std::ostream &out ) const {
     Atom::fout( out );
     out << std::hex;
-    out << "\nversion=" << int(m_version) << " profile=0x" << int(m_profile) << " compat=0x" << int(m_compatibility)
+    out << "version=" << int(m_version) << " profile=0x" << int(m_profile) << " compat=0x" << int(m_compatibility)
         << " level=0x" << int(m_level)
-        << std::dec << " nalu length=" << int(m_nalulen) << " num of SPS=" << m_sps.size();
+        << std::dec << " nalu length=" << int(m_nalulen) << " num of SPS=" << m_sps.size() << "\n";
 
-    out << "\nSPS: " << std::hex << std::setw(2) << std::setfill('0');
+    indent( out );
+    out << "SPS: " << std::hex << std::setw(2) << std::setfill('0');
     for( auto sps: m_sps ) {
         out << "{ ";
         for( auto b : sps )
             out << int(b) << " ";
         out << "}";
     }
-    out << "\nPPS: ";
+    out << "\n";
+    indent( out );
+    out << "PPS: ";
     for( auto pps: m_pps ) {
         out << "{ ";
         for( auto b : pps )

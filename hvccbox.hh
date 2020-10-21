@@ -18,7 +18,7 @@ private:
         ConfigSet() = default;
         ConfigSet( std::istream & is );
 
-        void fout( std::ostream & out ) const;
+        void fout( std::ostream & out, const Atom * atom ) const;
 
     private:
         uint8_t m_type;

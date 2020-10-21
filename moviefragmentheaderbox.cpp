@@ -12,5 +12,5 @@ MovieFragmentHeaderBox::MovieFragmentHeaderBox( std::istream & is ) : Atom( is )
 
 void MovieFragmentHeaderBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec << " sn: " << m_sequenceNumber;
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec << " sn: " << m_sequenceNumber;
 }

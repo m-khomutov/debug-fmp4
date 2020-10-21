@@ -21,15 +21,15 @@ HvcCBox::ConfigSet::ConfigSet( std::istream & is ) {
         f_store_to_rbsp( is, len, &m_data.back() );
     }
 }
-void HvcCBox::ConfigSet::fout( std::ostream & out ) const {
-    out << std::dec << "Config Set " << int(m_type) << "\n";
+void HvcCBox::ConfigSet::fout( std::ostream & out, const Atom * atom ) const {
+    atom->indent( out );
+    out << std::dec << "Config Set " << int(m_type);
     for( size_t i(0); i < m_data.size(); ++i ) {
-        out << (i+1) << ". [";
+        out << " [";
         for( auto c : m_data[i] )
             out << std::hex << std::setw(2) << std::setfill('0') << int(c) << " " << std::dec;
         out << "]";
     }
-    out << "\n";
 }
 void HvcCBox::ConfigSet::f_store_to_rbsp( std::istream& is, uint16_t length, std::vector< uint8_t > * rbsp ) {
     int zeroes = 0;
@@ -68,14 +68,15 @@ HvcCBox::HvcCBox( std::istream& is ) : Atom( is ) {
 
 void HvcCBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << std::endl;
 
     out << "config: [ " << std::hex << std::setw(2) << std::setfill( '0' );
     for( auto c : m_general_config )
         out << int(c) << " ";
-    out << "]\n";
-    out << "min spacial segmentation: " << m_min_spacial_segmentation << " framerate: " << m_framerate << "\n";
+    out << "] ";
+    out << "min spacial segmentation: " << m_min_spacial_segmentation << " framerate: " << m_framerate;
 
-    for( auto set : m_config_set_nalus )
-        set.fout( out );
+    for( auto set : m_config_set_nalus ) {
+        out << "\n";
+        set.fout( out, this );
+    }
 }

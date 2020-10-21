@@ -21,7 +21,7 @@ FileTypeBox::FileTypeBox( std::istream & is, uint32_t sz ) : Atom( is ) {
 
 void FileTypeBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nmajor brand='" << m_majorBrand << "' minor version=" << be32toh( m_minorVersion ) << " compatible brands={";
+    out << "major brand='" << m_majorBrand << "' minor version=" << be32toh( m_minorVersion ) << " compatible brands={";
     for( size_t i(0); i < m_compatibleBrands.size(); ++i ) {
         out << m_compatibleBrands[i];
         out << (i != m_compatibleBrands.size()-1 ? " " : "}");

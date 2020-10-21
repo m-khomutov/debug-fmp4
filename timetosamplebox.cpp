@@ -22,7 +22,7 @@ TimeToSampleBox::TimeToSampleBox( std::istream& is ) : Atom( is ) {
 
 void TimeToSampleBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
     out << " samples={";
     for( auto p : m_entries )
         out << "'count=" << p.first << " delta=" << p.second << "' ";

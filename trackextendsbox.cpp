@@ -46,7 +46,7 @@ TrackExtendsBox::TrackExtendsBox( std::istream & is ) : Atom( is ) {
 
 void TrackExtendsBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
     out << " track id=" << m_trackID << " defaults: { sample description index=" << m_defaultSampleDescriptionIndex
         << " sample duration=" << m_defaultSampleDuration << " sample size=" << m_defaultSampleSize << " sample flags=[";
     m_defaultSampleFlags->fout( out );

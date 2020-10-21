@@ -39,7 +39,7 @@ public:
             return m_sampleCompositionTimeOffset;
 	}
 
-    void fout( std::ostream& out );
+    void fout( std::ostream& out, const Atom * atom );
 
     private:
         uint32_t m_trflags;

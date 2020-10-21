@@ -77,6 +77,9 @@ public:
     std::streampos position() const;
     bool container() const;
 
+    void setIndent( int indent );
+    void indent( std::ostream& out ) const;
+
 protected:
     virtual void fout( std::ostream& out ) const;
 
@@ -90,6 +93,7 @@ private:
     std::string m_strtype;
     uint32_t m_size;
     std::streampos m_position;
+    int m_indent {0};
 
     friend std::ostream & operator <<( std::ostream& out, const Atom& atom );
 };

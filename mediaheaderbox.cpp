@@ -41,7 +41,7 @@ MediaHeaderBox::MediaHeaderBox( std::istream & is, uint32_t sz ) : Atom( is ) {
 
 void MediaHeaderBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
     out << " ctime='"; Atom::ctime( out, m_creationTime );
     out << " mtime='"; Atom::ctime( out, m_modificationTime );
     out << " timescale=" << m_timescale << " duration=" << m_duration;

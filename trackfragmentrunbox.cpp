@@ -19,16 +19,17 @@ TrackFragmentRunBox::Sample::Sample( std::istream &is, uint32_t flags ) : m_trfl
     }
 }
 
-void TrackFragmentRunBox::Sample::fout( std::ostream &out ) {
-    if( m_trflags & TrackFragmentRunBox::kSampleDurationPresent )
-        out << " duration: " << m_sampleDuration << "; ";
-    if( m_trflags & TrackFragmentRunBox::kSampleSizePresent )
-        out << " size: " << m_sampleSize << "; ";
-    if( m_trflags & TrackFragmentRunBox::kSampleFlagsPresent )
-        out << " flags: " << std::hex << m_sampleFlags << std::dec<< "; ";
-    if( m_trflags & TrackFragmentRunBox::kSampleCompositionTimeOffsetsPresent )
-        out << " time offset: " << m_sampleCompositionTimeOffset << "; ";
+void TrackFragmentRunBox::Sample::fout( std::ostream &out, const Atom * atom ) {
     out << "\n";
+    atom->indent( out );
+    if( m_trflags & TrackFragmentRunBox::kSampleDurationPresent )
+        out << "duration: " << m_sampleDuration << "; ";
+    if( m_trflags & TrackFragmentRunBox::kSampleSizePresent )
+        out << "size: " << m_sampleSize << "; ";
+    if( m_trflags & TrackFragmentRunBox::kSampleFlagsPresent )
+        out << "flags: " << std::hex << m_sampleFlags << std::dec<< "; ";
+    if( m_trflags & TrackFragmentRunBox::kSampleCompositionTimeOffsetsPresent )
+        out << "time offset: " << m_sampleCompositionTimeOffset << "; ";
 }
 
 TrackFragmentRunBox::TrackFragmentRunBox( std::istream& is ) : Atom( is ){
@@ -56,13 +57,13 @@ TrackFragmentRunBox::TrackFragmentRunBox( std::istream& is ) : Atom( is ){
 
 void TrackFragmentRunBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " trFlags=" << std::hex << m_flags << std::dec;
+    out << "version=" << int(m_version) << " trFlags=" << std::hex << m_flags << std::dec;
     if( m_flags & TrackFragmentRunBox::kDataOffsetPresent )
         out << " data offset: " << m_dataOffset;
     if( m_flags & TrackFragmentRunBox::kFirstSampleFlagsPresent )
         out << " first sample flags: " << std::hex << m_firstSampleFlags << std::dec;
 
-    out << " samples (" << m_sampleCount << "):\n";
+    out << " samples (" << m_sampleCount << "):";
     for( auto sample: m_samples )
-        sample.fout( out );
+        sample.fout( out, this );
 }

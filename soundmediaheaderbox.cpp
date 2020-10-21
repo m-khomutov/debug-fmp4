@@ -13,6 +13,5 @@ SoundMediaHeaderBox::SoundMediaHeaderBox( std::istream& is ) : Atom( is ) {
 
 void SoundMediaHeaderBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
-    out << " balance=" << m_balance;
+    out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec << " balance=" << m_balance;
 }

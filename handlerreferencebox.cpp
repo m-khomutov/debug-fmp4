@@ -24,5 +24,5 @@ HandlerReferenceBox::HandlerReferenceBox( std::istream & is, std::string * type 
 
 void HandlerReferenceBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nhandler='" << m_handlerType << "' name='" << m_name << "'";
+    out << "handler='" << m_handlerType << "' name='" << m_name << "'";
 }

@@ -34,7 +34,7 @@ TrackFragmentHeaderBox::TrackFragmentHeaderBox( std::istream & is ) : Atom( is )
 
 void TrackFragmentHeaderBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "\nversion=" << int(m_version) << "; flags=0x" << std::hex << m_flags << std::dec << "; track id=" << m_trackID;
+    out << "version=" << int(m_version) << "; flags=0x" << std::hex << m_flags << std::dec << "; track id=" << m_trackID;
     if( m_flags & kBaseDataOffsetPresent ) {
         out << "; base data offset=" << m_baseDataOffset;
     }
