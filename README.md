@@ -13,7 +13,7 @@ cd build
 cmake ..
 make all install
 ```
-**Root** privileges may be required to run *install* command
+**Root** privileges may be required to run *install* command. debug-fmp4 is installed in */usr/local/bin/* directory
 
 ## Usage
 
