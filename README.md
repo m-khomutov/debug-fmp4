@@ -51,6 +51,9 @@ moov(6d6f6f76) size=1158 position=24
 . . .
 ```
 
+* **size** field - atom size.
+* **position** field - atom offset from the start of the file.
+
 ## OS Support
 
 Used on **Linux 64-bit** (Ubuntu 18.04.5 LTS)
