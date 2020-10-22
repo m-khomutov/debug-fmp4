@@ -44,15 +44,17 @@ MediaDataBox::MediaDataBox( std::istream& is, const TrunMap &trunMap ) : Atom( i
 void MediaDataBox::fout( std::ostream &out ) const {
     Atom::fout( out );
     if( !m_nalu_vector.empty() ) {
+        out << "\n";
         indent( out );
-        out << "\nvideo(type:size:offset) : {\n";
+        out << "video(type:size:offset) : {\n";
         for( auto nalu : m_nalu_vector )
             out << std::hex << " 0x" << int(nalu.type) << std::dec << ":" << nalu.size << ":" << nalu.offset << "\n";
         out << "}";
     }
     if( !m_audio_vector.empty() ) {
+        out << "\n";
         indent( out );
-        out << "\naudio(size:offset) : {\n";
+        out << "audio(size:offset) : {\n";
         for( auto pack : m_audio_vector ) {
             out << " " << pack.size << ":" << pack.offset << "[ ";
             for( uint32_t i(0); i < (pack.size > sizeof(pack.data) ? sizeof(pack.data) : pack.size); ++i )

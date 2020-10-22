@@ -40,7 +40,6 @@ DataEntryUrnBox::DataEntryUrnBox( std::istream& is ) : DataEntryBox( is ) {
 
 void DataEntryUrnBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    indent( out );
     out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
     out << " name='" << m_name << "' location='" << m_location << "'";
 }
@@ -60,7 +59,6 @@ DataReferenceBox::DataReferenceBox( std::istream& is ) : Atom( is ) {
 
 void DataReferenceBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    indent( out );
     out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
     out << " item count=" << m_entries.size();
 }
