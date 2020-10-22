@@ -6,7 +6,9 @@ Debugging tool to verify fmp4 structure (mainly by ISO/IEC 14496-12)
 
 Use cmake version 3.4 or more to compile debug-fmp4. 
 
-```mkdir build
+In project directory
+```
+mkdir build
 cd build
 cmake ..
 make all install
