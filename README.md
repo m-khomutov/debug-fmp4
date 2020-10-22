@@ -13,7 +13,7 @@ cd build
 cmake ..
 make all install
 ```
-**Root** privileges can be required to run *install* command
+**Root** privileges may be required to run *install* command
 
 ## Usage
 
