@@ -31,7 +31,7 @@ moov(6d6f6f76) size=1158 position=24
          minf(6d696e66) size=358 position=325
             vmhd(766d6864) size=20 position=333 version=0 flags=1 graphicsmode=0 opcolor={ 0 0 0 }
             dinf(64696e66) size=36 position=353
-               dref(64726566) size=28 position=361                version=0 flags=0 item count=1
+               dref(64726566) size=28 position=361 version=0 flags=0 item count=1
                   url (75726c20) size=12 position=377 version=0 flags=1 location=''
             stbl(7374626c) size=294 position=389
                stsd(73747364) size=218 position=397 version=0 flags=0 entries=1
