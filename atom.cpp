@@ -25,6 +25,7 @@
 #include "trackfragmentheaderbox.hh"
 #include "elementarystreamdescriptorbox.h"
 #include "trackfragmentrunbox.hh"
+#include "initialobjectdescriptorbox.hh"
 #include "mediadatabox.hh"
 
 std::ostream & operator <<( std::ostream& out, const Atom& atom ) {
@@ -111,6 +112,9 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         else if( *atom == Atom::trun ) {
             return new TrackFragmentRunBox( is );
         }
+        else if( *atom == Atom::iods ) {
+          return new InitialObjectDescriptorBox( is, atom->size() );
+        }
         else if( *atom == Atom::mdat ) {
             return new MediaDataBox( is, trunMap );
         }
@@ -128,11 +132,16 @@ Atom::Atom( Value val ) {
 Atom::Atom( std::istream& is ) {
     m_position = is.tellg();
 
-    is.read( (char*)&m_size, sizeof(m_size) );
-    m_size = be32toh(m_size);
+    uint32_t tmp;
+    is.read( (char*)&tmp, sizeof(tmp) );
+    m_size = be32toh(tmp);
 
     is.read( m_type.buf, sizeof(m_type.buf) );
     m_strtype = std::string( m_type.buf, sizeof(m_type.buf) );
+    if( m_size == 1 ) {
+        is.read( (char*)&m_size, sizeof(m_size) );
+        m_size = be64toh(m_size);
+    }
 }
 
 Atom::operator uint32_t() const {
@@ -143,7 +152,7 @@ const char * Atom::str() const {
     return m_strtype.c_str();
 }
 
-uint32_t Atom::size() const {
+uint64_t Atom::size() const {
     return m_size;
 }
 

@@ -17,7 +17,7 @@ namespace {
 
         void add( std::streampos size, std::streampos unserialized ) {
             int indent = m_items.empty() ? 0 : m_items.back().indent + m_step;
-            m_items.push_back( Item( size, unserialized, indent ) );
+            m_items.emplace_back( size, unserialized, indent );
         }
         void normalize() {
             if( !m_items.empty() ) {
@@ -25,8 +25,14 @@ namespace {
                 while( it != m_items.rend() ) {
                     if( it->unserialized == 0 ) {
                         std::vector< Item >::reverse_iterator next_it = std::next( it );
-                        next_it->unserialized -= it->size;
-                        m_items.erase( it.base() );
+                        if( next_it != m_items.rend() )
+                            next_it->unserialized -= it->size;
+                        if( it.base() != m_items.end() ) {
+                            m_items.erase( it.base() );
+                        }
+                        else {
+                            m_items.pop_back();
+                        }
                         it = next_it;
                     }
                     else

@@ -60,7 +60,8 @@ public:
         traf = 0x66617274,
         tfhd = 0x64686674,
         trun = 0x6e757274,
-        udta = 0x61746475
+        udta = 0x61746475,
+        iods = 0x73646f69
     };
 
     static Atom * make( std::istream & is, const TrunMap & trunMap );
@@ -73,7 +74,7 @@ public:
 
     const char * str() const;
 
-    uint32_t size() const;
+    uint64_t size() const;
     std::streampos position() const;
     bool container() const;
 
@@ -91,7 +92,7 @@ private:
         char buf[sizeof(uint32_t)];
     } m_type;
     std::string m_strtype;
-    uint32_t m_size;
+    uint64_t m_size;
     std::streampos m_position;
     int m_indent {0};
 
