@@ -10,21 +10,10 @@ MediaDataBox::MediaDataBox( std::istream& is, const TrunMap &trunMap ) : Atom( i
     if( !trunMap.empty() ) {
         is.seekg( position() + std::streampos(8) );
 
-        union {
-            uint32_t value;
-            char buffer[sizeof(value)];
-        } u;
-
         TrunMap::const_iterator trun_iter = trunMap.begin();
         if( trun_iter != trunMap.end() ) {
             for( auto sample : *(trun_iter->second) ) {
-                size_t p = is.tellg();
-                is.read( u.buffer, sizeof(u.buffer) );
-
-                uint32_t nalusz = be32toh(u.value);
-                char c = is.get();
-                m_nalu_vector.push_back( Nalu( (c>>1)&0x3f, nalusz, p ) );
-                is.seekg( p + sizeof(u.buffer) + nalusz );
+                f_read_nalunit( is );
             }
             std::advance( trun_iter, 1 );
             if( trun_iter != trunMap.end() ) {
@@ -38,17 +27,48 @@ MediaDataBox::MediaDataBox( std::istream& is, const TrunMap &trunMap ) : Atom( i
             }
         }
     }
-    is.seekg( position() + std::streampos(size()) );
+    else {
+        Indicator indicator( is, size() );
+        while ( is.tellg() != indicator.end() ) {
+            if( is.good() ) {
+                f_read_nalunit( is );
+                indicator.show( is );
+            }
+            else
+                break;
+        }
+    }
+    if( size() ) {
+        is.seekg( position() + std::streampos(size()) );
+    }
+    else
+        is.seekg( 0, std::ios_base::end );
+}
+
+void MediaDataBox::f_read_nalunit( std::istream& is ) {
+    union {
+        uint32_t value;
+        char buffer[sizeof(value)];
+    } u;
+    size_t p = is.tellg();
+    is.read( u.buffer, sizeof(u.buffer) );
+
+    uint32_t nalusz = be32toh(u.value);
+    char c = is.get();
+    is.seekg( p + sizeof(u.buffer) + nalusz );
+    if( is.good() ) {
+        m_nalu_vector.push_back( Nalu( c&0x1f, nalusz, p ) );
+    }
 }
 
 void MediaDataBox::fout( std::ostream &out ) const {
-    Atom::fout( out );
     if( !m_nalu_vector.empty() ) {
         out << "\n";
         indent( out );
         out << "video(type:size:offset) : {\n";
-        for( auto nalu : m_nalu_vector )
-            out << std::hex << " 0x" << int(nalu.type) << std::dec << ":" << nalu.size << ":" << nalu.offset << "\n";
+        for( auto nalu : m_nalu_vector ) {
+            out << std::hex << "{" << int(nalu.type) << std::dec << ":" << nalu.size << ":" << nalu.offset << "}";
+        }
         out << "}";
     }
     if( !m_audio_vector.empty() ) {
@@ -63,4 +83,5 @@ void MediaDataBox::fout( std::ostream &out ) const {
         }
         out << "}";
     }
+    Atom::fout( out );
 }

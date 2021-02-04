@@ -113,11 +113,11 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
             return new TrackFragmentRunBox( is );
         }
         else if( *atom == Atom::iods ) {
-          return new InitialObjectDescriptorBox( is, atom->size() );
+            return new InitialObjectDescriptorBox( is, atom->size() );
         }
-        else if( *atom == Atom::mdat ) {
-            return new MediaDataBox( is, trunMap );
-        }
+        //else if( *atom == Atom::mdat ) {
+        //    return new MediaDataBox( is, trunMap );
+        //}
         else
             is.seekg( atom->position() + std::streampos(atom->size()) );
     }

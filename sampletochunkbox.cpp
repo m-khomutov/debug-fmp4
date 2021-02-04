@@ -29,7 +29,8 @@ SampleToChunkBox::SampleToChunkBox( std::istream & is ) : Atom( is ) {
 void SampleToChunkBox::fout( std::ostream &out ) const {
     Atom::fout( out );
     out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
-    out << " entries(first:samples:index)={ " << m_entries.size();
+    out << " entries=" << m_entries.size();
+    out << " (first:samples:index)={ ";
     for( auto entry : m_entries )
         entry->fout( out );
     out << "}";

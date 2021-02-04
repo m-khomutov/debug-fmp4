@@ -6,8 +6,46 @@
 #define FMP4VERIFIER_MEDIADATABOX_HH
 
 #include "trackfragmentrunbox.hh"
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <vector>
+#include <iostream>
 
-#include "vector"
+class Indicator {
+public:
+    Indicator( std::istream& is, size_t atom_size )
+    : m_begin( is.tellg() ),m_end( m_begin + std::streampos(atom_size) ),m_duration( atom_size ) {
+        if( m_duration == 0 ) {
+            is.seekg( 0, std::ios_base::end );
+            m_end = is.tellg();
+            is.seekg( m_begin );
+            m_duration = m_end - m_begin;
+        }
+        ioctl( STDOUT_FILENO, TIOCGWINSZ, &m_winsz );
+    }
+    std::streampos begin() const {
+        return m_begin;
+    }
+    std::streampos end() const {
+        return m_end;
+    }
+    void show( std::istream& is ) {
+        std::streampos cur = is.tellg();
+        std::streampos percent = std::streampos(100 * is.tellg()) / m_duration;
+        size_t count = m_winsz.ws_col * percent / 100;
+        if( count > m_count ) {
+            for( size_t i(0); i < count - m_count; ++i )
+                std::cerr << "#";
+            m_count = count;
+        }
+    }
+private:
+    std::streampos m_begin;
+    std::streampos m_end;
+    std::streampos m_duration;
+    winsize m_winsz;
+    size_t m_count { 0 };
+};
 
 class MediaDataBox : public Atom {
 public:
@@ -31,7 +69,8 @@ private:
     std::vector< AudioPack > m_audio_vector;
 
 private:
-    void fout( std::ostream& out ) const override;
+  void f_read_nalunit( std::istream& is );
+  void fout( std::ostream& out ) const override;
 };
 
 
