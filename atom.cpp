@@ -27,6 +27,7 @@
 #include "trackfragmentrunbox.hh"
 #include "initialobjectdescriptorbox.hh"
 #include "mediadatabox.hh"
+#include "chunkoffsetbox.hh"
 
 std::ostream & operator <<( std::ostream& out, const Atom& atom ) {
     atom.fout( out );
@@ -97,6 +98,12 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         else if( *atom == Atom::stsc ) {
             return new SampleToChunkBox( is );
         }
+        else if( *atom == Atom::stco ) {
+            return new ChunkOffsetBox< uint32_t >( is );
+        }
+        else if( *atom == Atom::co64 ) {
+            return new ChunkOffsetBox< uint64_t >( is );
+        }
         else if( *atom == Atom::mehd ) {
             return new MovieExtendsHeaderBox( is );
         }
@@ -115,9 +122,9 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         else if( *atom == Atom::iods ) {
             return new InitialObjectDescriptorBox( is, atom->size() );
         }
-        //else if( *atom == Atom::mdat ) {
-        //    return new MediaDataBox( is, trunMap );
-        //}
+        else if( *atom == Atom::mdat ) {
+            return new MediaDataBox( is, trunMap );
+        }
         else
             is.seekg( atom->position() + std::streampos(atom->size()) );
     }

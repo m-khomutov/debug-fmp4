@@ -52,6 +52,7 @@ public:
         stsc = 0x63737473,
         mehd = 0x6468656d,
         stco = 0x6f637473,
+        co64 = 0x34366f63,
         mvex = 0x7865766d,
         trex = 0x78657274,
         uuid = 0x64697575,

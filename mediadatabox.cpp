@@ -27,7 +27,7 @@ MediaDataBox::MediaDataBox( std::istream& is, const TrunMap &trunMap ) : Atom( i
             }
         }
     }
-    else {
+    /*else {
         Indicator indicator( is, size() );
         while ( is.tellg() != indicator.end() ) {
             if( is.good() ) {
@@ -37,7 +37,7 @@ MediaDataBox::MediaDataBox( std::istream& is, const TrunMap &trunMap ) : Atom( i
             else
                 break;
         }
-    }
+    }*/
     if( size() ) {
         is.seekg( position() + std::streampos(size()) );
     }
