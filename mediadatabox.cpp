@@ -10,39 +10,65 @@ MediaDataBox::MediaDataBox( std::istream& is, const TrunMap &trunMap ) : Atom( i
     if( !trunMap.empty() ) {
         is.seekg( position() + std::streampos(8) );
 
-        TrunMap::const_iterator trun_iter = trunMap.begin();
-        if( trun_iter != trunMap.end() ) {
-            for( auto sample : *(trun_iter->second) ) {
-                f_read_nalunit( is );
-            }
-            std::advance( trun_iter, 1 );
-            if( trun_iter != trunMap.end() ) {
-                for( auto sample : *(trun_iter->second) ) {
-                    size_t p = is.tellg();
-                    m_audio_vector.push_back( AudioPack( sample.size(), p ) );
-                    for( uint32_t i(0); i < (sample.size() > sizeof(AudioPack::data) ? sizeof(AudioPack::data) : sample.size()); ++i )
-                        m_audio_vector.back().data[i] = is.get();
-                    is.seekg( p + sample.size() );
-                }
+        for( auto tr : trunMap ) {
+            switch( tr.first ) {
+            case Atom::vide:
+                f_read_video( is, tr.second.get() );
+                break;
+            case Atom::soun:
+                f_read_audio( is, tr.second.get() );
+                break;
+            case Atom::text:
+                f_read_text( is, tr.second.get() );
+                break;
             }
         }
     }
-    /*else {
-        Indicator indicator( is, size() );
-        while ( is.tellg() != indicator.end() ) {
-            if( is.good() ) {
-                f_read_nalunit( is );
-                indicator.show( is );
-            }
-            else
-                break;
-        }
-    }*/
     if( size() ) {
         is.seekg( position() + std::streampos(size()) );
     }
     else
         is.seekg( 0, std::ios_base::end );
+}
+
+void MediaDataBox::f_read_video( std::istream &is, TrackFragmentRunBox* trun ) {
+    for( auto sample : *trun ) {
+        f_read_nalunit( is );
+    }
+}
+
+void MediaDataBox::f_read_audio( std::istream &is, TrackFragmentRunBox* trun ) {
+    for( auto sample : *trun ) {
+        size_t p = is.tellg();
+        m_audio_vector.push_back( AudioPack( sample.size(), p ) );
+        for( uint32_t i(0); i < (sample.size() > sizeof(AudioPack::data) ? sizeof(AudioPack::data) : sample.size()); ++i )
+            m_audio_vector.back().data[i] = is.get();
+        is.seekg( p + sample.size() );
+    }
+}
+
+void MediaDataBox::f_read_text( std::istream &is, TrackFragmentRunBox* trun ) {
+    for( auto sample : *trun ) {
+        size_t p = is.tellg();
+        m_text_vector.push_back( TextPack( sample.size(), p ) );
+        uint16_t textsz;
+        is.read( (char*)&textsz, sizeof(textsz) );
+        textsz = be16toh( textsz );
+        m_text_vector.back().text.resize( textsz );
+        is.read( &m_text_vector.back().text[0], textsz );
+        int off = sample.size() - (textsz + 2);
+        while( off > 0 ) {
+            try {
+                m_text_vector.back().modifiers.push_back( Atom( is ) );
+                off -= m_text_vector.back().modifiers.back().size();
+            }
+            catch( const std::logic_error& err ) {
+                std::cerr << "text modifier error : " << err.what();
+                break;
+            }
+        }
+        is.seekg( p + sample.size() );
+    }
 }
 
 void MediaDataBox::f_read_nalunit( std::istream& is ) {
@@ -62,6 +88,7 @@ void MediaDataBox::f_read_nalunit( std::istream& is ) {
 }
 
 void MediaDataBox::fout( std::ostream &out ) const {
+    Atom::fout( out );
     if( !m_nalu_vector.empty() ) {
         out << "\n";
         indent( out );
@@ -83,5 +110,16 @@ void MediaDataBox::fout( std::ostream &out ) const {
         }
         out << "}";
     }
-    Atom::fout( out );
+    if( !m_text_vector.empty() ) {
+        out << "\n";
+        indent( out );
+        out << "text(size:offset:text[ modifiers ]) : {\n";
+        for( auto pack : m_text_vector ) {
+            out << " " << pack.size << ":" << pack.offset << ":" << pack.text << "[ " << std::hex;
+            for( auto m : pack.modifiers )
+                out << m << ";";
+            out << std::dec << " ]\n";
+        }
+        out << "}";
+    }
 }

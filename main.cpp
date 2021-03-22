@@ -1,6 +1,8 @@
 #include "atom.h"
 #include "trackfragmentrunbox.hh"
 #include "mediadatabox.hh"
+#include "trackheaderbox.hh"
+#include "handlerreferencebox.hh"
 #include "trackfragmentheaderbox.hh"
 
 #include <fstream>
@@ -70,25 +72,47 @@ int main( int argc, char* argv[] ) {
     std::streampos filesize = f.tellg();
     f.seekg( 0 );
 
-    uint32_t track_id = 0;
-    TrunMap trun_map;
+    std::vector< std::pair< uint32_t, Atom::Value > > handlers;
+    Atom::Value track_handler = Atom::nval;
+    Atom::TrunMap trun_map;
     std::unique_ptr< MediaDataBox > data;
     Indent indent;
+    size_t gap { 0 };
 
     while( f.good() ) {
         std::unique_ptr< Atom > atom( Atom::make( f, trun_map ) );
         if( atom ) {
+            if( gap ) {
+                std::cerr << " gap : " << gap << std::endl;
+                gap = 0;
+            }
             indent.add( atom->size(), std::streampos(atom->size()) - (f.tellg() - atom->position()) );
             atom->setIndent( indent );
             indent.normalize();
 
             std::cout << (*atom) << std::endl;
-            if( *atom == Atom::tfhd ) {
-                track_id = static_cast< TrackFragmentHeaderBox* >(atom.get())->trackID();
+            if( *atom == Atom::tkhd ) {
+                handlers.push_back( std::make_pair( static_cast< TrackHeaderBox* >(atom.get())->trackId(), Atom::nval ) );
+            }
+            else if( *atom == Atom::hdlr ) {
+                handlers.back().second = static_cast< HandlerReferenceBox* >(atom.get())->type();
+            }
+            else if( *atom == Atom::tfhd ) {
+                for( auto p : handlers ) {
+                    if( p.first == static_cast< TrackFragmentHeaderBox* >(atom.get())->trackID() ) {
+                        track_handler = p.second;
+                        break;
+                    }
+                }
             }
             else if( *atom == Atom::trun ) {
-                trun_map[track_id] = std::shared_ptr< TrackFragmentRunBox >( static_cast< TrackFragmentRunBox* >(atom.release()) );
+                if( track_handler != Atom::nval )
+                    trun_map[track_handler] = std::shared_ptr< TrackFragmentRunBox >( static_cast< TrackFragmentRunBox* >(atom.release()) );
             }
+        }
+        else {
+            fprintf( stderr,"%02x ", f.get() );
+            ++gap;
         }
         if( f.tellg() >= filesize )
             break;

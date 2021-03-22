@@ -12,8 +12,9 @@ HandlerReferenceBox::HandlerReferenceBox( std::istream & is, std::string * type 
 
     is.read( (char*)&tmp.val, sizeof(tmp.val) );  // pre_defined = 0
     is.read( (char*)&tmp.val, sizeof(tmp.val) );
-    m_handlerType = std::string( tmp.buf, sizeof(tmp.buf) );
-    *type = m_handlerType;
+    m_type = Atom::Value(tmp.val);
+    m_typeAsString = std::string( tmp.buf, sizeof(tmp.buf) );
+    *type = m_typeAsString;
 
     for( int i(0); i < 3; ++i )
         is.read( (char*)&tmp.val, sizeof(tmp.val) ); // unsigned int(32)[3] reserved = 0
@@ -24,5 +25,5 @@ HandlerReferenceBox::HandlerReferenceBox( std::istream & is, std::string * type 
 
 void HandlerReferenceBox::fout( std::ostream &out ) const {
     Atom::fout( out );
-    out << "handler='" << m_handlerType << "' name='" << m_name << "'";
+    out << "handler='" << m_typeAsString << "' name='" << m_name << "'";
 }

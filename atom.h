@@ -10,8 +10,6 @@
 #include <memory>
 
 class TrackFragmentRunBox;
-using TrunMap = class std::map<unsigned int, std::shared_ptr<TrackFragmentRunBox> >;
-
 class Atom {
 public:
     enum Value {
@@ -32,6 +30,9 @@ public:
         mdia = 0x6169646d,
         mdhd = 0x6468646d,
         hdlr = 0x726c6468,
+        vide = 0x65646976,
+        soun = 0x6e756f73,
+        text = 0x74786574,
         minf = 0x666e696d,
         vmhd = 0x64686d76,
         smhd = 0x64686d73,
@@ -47,6 +48,7 @@ public:
         hev1 = 0x31766568,
         hvcc = 0x43637668,
         mp4a = 0x6134706d,
+        tx3g = 0x67337874,
         esds = 0x73647365,
         stsz = 0x7a737473,
         stsc = 0x63737473,
@@ -64,6 +66,7 @@ public:
         udta = 0x61746475,
         iods = 0x73646f69
     };
+    using TrunMap = class std::map<Atom::Value, std::shared_ptr<TrackFragmentRunBox> >;
 
     static Atom * make( std::istream & is, const TrunMap & trunMap );
 

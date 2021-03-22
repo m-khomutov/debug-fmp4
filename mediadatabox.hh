@@ -65,10 +65,22 @@ private:
 
         AudioPack( uint32_t s, size_t o ) : size( s ),offset( o ) {}
     };
+    struct TextPack {
+        uint32_t size;
+        size_t offset;
+        std::string text;
+        std::vector< Atom > modifiers;
+
+        TextPack( uint32_t s, size_t o ) : size( s ),offset( o ) {}
+    };
     std::vector< Nalu > m_nalu_vector;
     std::vector< AudioPack > m_audio_vector;
+    std::vector< TextPack > m_text_vector;
 
 private:
+  void f_read_video( std::istream& is, TrackFragmentRunBox* trun );
+  void f_read_audio( std::istream& is, TrackFragmentRunBox* trun );
+  void f_read_text( std::istream& is, TrackFragmentRunBox* trun );
   void f_read_nalunit( std::istream& is );
   void fout( std::ostream& out ) const override;
 };
