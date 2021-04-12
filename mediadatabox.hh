@@ -81,7 +81,7 @@ private:
   void f_read_video( std::istream& is, TrackFragmentRunBox* trun );
   void f_read_audio( std::istream& is, TrackFragmentRunBox* trun );
   void f_read_text( std::istream& is, TrackFragmentRunBox* trun );
-  void f_read_nalunit( std::istream& is );
+  void f_read_nalunit( std::istream& is, const TrackFragmentRunBox::Sample& sample );
   void fout( std::ostream& out ) const override;
 };
 

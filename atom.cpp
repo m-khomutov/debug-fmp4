@@ -29,6 +29,7 @@
 #include "trackfragmentrunbox.hh"
 #include "trackheaderbox.hh"
 #include "videomediaheaderbox.hh"
+#include "pixelaspectratiobox.h"
 #include <cstring>
 
 std::ostream & operator <<( std::ostream& out, const Atom& atom ) {
@@ -96,6 +97,9 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         }
         else if( *atom == Atom::avcc ) {
             return new AvcCBox( is );
+        }
+        else if( *atom == Atom::pasp ) {
+          return new PixelAspectRatioBox( is );
         }
         else if( *atom == Atom::hvcc ) {
             return new HvcCBox( is );

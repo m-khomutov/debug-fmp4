@@ -33,7 +33,7 @@ MediaDataBox::MediaDataBox( std::istream& is, const TrunMap &trunMap ) : Atom( i
 
 void MediaDataBox::f_read_video( std::istream &is, TrackFragmentRunBox* trun ) {
     for( auto sample : *trun ) {
-        f_read_nalunit( is );
+        f_read_nalunit( is, sample );
     }
 }
 
@@ -71,19 +71,23 @@ void MediaDataBox::f_read_text( std::istream &is, TrackFragmentRunBox* trun ) {
     }
 }
 
-void MediaDataBox::f_read_nalunit( std::istream& is ) {
+void MediaDataBox::f_read_nalunit( std::istream& is, const TrackFragmentRunBox::Sample& sample ) {
     union {
         uint32_t value;
         char buffer[sizeof(value)];
     } u;
-    size_t p = is.tellg();
-    is.read( u.buffer, sizeof(u.buffer) );
+    size_t off = 0;
+    while( off < sample.size() ) {
+        size_t p = is.tellg();
+        is.read( u.buffer, sizeof(u.buffer) );
 
-    uint32_t nalusz = be32toh(u.value);
-    char c = is.get();
-    is.seekg( p + sizeof(u.buffer) + nalusz );
-    if( is.good() ) {
-        m_nalu_vector.push_back( Nalu( c&0x1f, nalusz, p ) );
+        uint32_t nalusz = be32toh(u.value);
+        char c = is.get();
+        is.seekg( p + sizeof(u.buffer) + nalusz );
+        if( is.good() ) {
+            m_nalu_vector.push_back( Nalu( c&0x1f, nalusz, p ) );
+        }
+        off += sizeof(u.buffer) + nalusz;
     }
 }
 
