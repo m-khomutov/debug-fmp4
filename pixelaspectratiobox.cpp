@@ -2,7 +2,7 @@
 // Created by mkh on 12.04.2021.
 //
 
-#include "pixelaspectratiobox.h"
+#include "pixelaspectratiobox.hh"
 
 namespace {
 std::string spacing2str( uint32_t hSpacing, uint32_t vSpacing) {

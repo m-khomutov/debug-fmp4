@@ -18,18 +18,19 @@
 #include "movieextendsheaderbox.hh"
 #include "moviefragmentheaderbox.hh"
 #include "movieheaderbox.hh"
+#include "nullmediaheaderbox.hh"
+#include "pixelaspectratiobox.hh"
 #include "sampledescriptionbox.hh"
 #include "samplesizebox.hh"
 #include "sampletochunkbox.hh"
 #include "soundmediaheaderbox.hh"
-#include "nullmediaheaderbox.hh"
 #include "timetosamplebox.hh"
 #include "trackextendsbox.hh"
 #include "trackfragmentheaderbox.hh"
 #include "trackfragmentrunbox.hh"
 #include "trackheaderbox.hh"
+#include "videofieldorderbox.hh"
 #include "videomediaheaderbox.hh"
-#include "pixelaspectratiobox.h"
 #include <cstring>
 
 std::ostream & operator <<( std::ostream& out, const Atom& atom ) {
@@ -99,7 +100,10 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
             return new AvcCBox( is );
         }
         else if( *atom == Atom::pasp ) {
-          return new PixelAspectRatioBox( is );
+            return new PixelAspectRatioBox( is );
+        }
+        else if( *atom == Atom::fiel ) {
+            return new VideoFieldOrderBox( is );
         }
         else if( *atom == Atom::hvcc ) {
             return new HvcCBox( is );
