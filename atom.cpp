@@ -3,29 +3,35 @@
 //
 
 #include "atom.h"
+#include "avccbox.hh"
+#include "chunkoffsetbox.hh"
+#include "compositionoffsetbox.hh"
+#include "datareferencebox.hh"
+#include "elementarystreamdescriptorbox.h"
 #include "filetypebox.hh"
 #include "freebox.hh"
-#include "movieheaderbox.hh"
-#include "trackheaderbox.hh"
-#include "mediaheaderbox.hh"
 #include "handlerreferencebox.hh"
-#include "videomediaheaderbox.hh"
-#include "soundmediaheaderbox.hh"
-#include "datareferencebox.hh"
-#include "timetosamplebox.hh"
-#include "compositionoffsetbox.hh"
-#include "sampledescriptionbox.hh"
-#include "avccbox.hh"
 #include "hvccbox.hh"
+#include "initialobjectdescriptorbox.hh"
+#include "mediadatabox.hh"
+#include "mediaheaderbox.hh"
+#include "movieextendsheaderbox.hh"
+#include "moviefragmentheaderbox.hh"
+#include "movieheaderbox.hh"
+#include "nullmediaheaderbox.hh"
+#include "pixelaspectratiobox.hh"
+#include "sampledescriptionbox.hh"
 #include "samplesizebox.hh"
 #include "sampletochunkbox.hh"
-#include "movieextendsheaderbox.hh"
+#include "soundmediaheaderbox.hh"
+#include "timetosamplebox.hh"
 #include "trackextendsbox.hh"
-#include "moviefragmentheaderbox.hh"
 #include "trackfragmentheaderbox.hh"
-#include "elementarystreamdescriptorbox.h"
 #include "trackfragmentrunbox.hh"
-#include "mediadatabox.hh"
+#include "trackheaderbox.hh"
+#include "videofieldorderbox.hh"
+#include "videomediaheaderbox.hh"
+#include <cstring>
 
 std::ostream & operator <<( std::ostream& out, const Atom& atom ) {
     atom.fout( out );
@@ -35,7 +41,13 @@ std::ostream & operator <<( std::ostream& out, const Atom& atom ) {
 Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
     static std::string handler_type;
 
-    std::unique_ptr< Atom > atom( new Atom( is ) );
+    std::unique_ptr< Atom > atom;
+    try {
+       atom.reset( new Atom( is ) );
+    }
+    catch( const std::logic_error& err ) {
+        return nullptr;
+    }
     if( !atom->container() ) {
         is.seekg( atom->position() );
 
@@ -63,6 +75,9 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         else if( *atom == Atom::smhd ) {
             return new SoundMediaHeaderBox( is );
         }
+        else if( *atom == Atom::nmhd ) {
+            return new NullMediaHeaderBox( is );
+        }
         else if( *atom == Atom::dref ) {
             return new DataReferenceBox( is );
         }
@@ -84,6 +99,12 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         else if( *atom == Atom::avcc ) {
             return new AvcCBox( is );
         }
+        else if( *atom == Atom::pasp ) {
+            return new PixelAspectRatioBox( is );
+        }
+        else if( *atom == Atom::fiel ) {
+            return new VideoFieldOrderBox( is );
+        }
         else if( *atom == Atom::hvcc ) {
             return new HvcCBox( is );
         }
@@ -95,6 +116,12 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         }
         else if( *atom == Atom::stsc ) {
             return new SampleToChunkBox( is );
+        }
+        else if( *atom == Atom::stco ) {
+            return new ChunkOffsetBox< uint32_t >( is );
+        }
+        else if( *atom == Atom::co64 ) {
+            return new ChunkOffsetBox< uint64_t >( is );
         }
         else if( *atom == Atom::mehd ) {
             return new MovieExtendsHeaderBox( is );
@@ -111,11 +138,13 @@ Atom * Atom::make( std::istream & is, const TrunMap & trunMap ) {
         else if( *atom == Atom::trun ) {
             return new TrackFragmentRunBox( is );
         }
+        else if( *atom == Atom::iods ) {
+            return new InitialObjectDescriptorBox( is, atom->size() );
+        }
         else if( *atom == Atom::mdat ) {
             return new MediaDataBox( is, trunMap );
         }
-        else
-            is.seekg( atom->position() + std::streampos(atom->size()) );
+        is.seekg( atom->position() + std::streampos(atom->size()) );
     }
 
     return atom.release();
@@ -128,11 +157,23 @@ Atom::Atom( Value val ) {
 Atom::Atom( std::istream& is ) {
     m_position = is.tellg();
 
-    is.read( (char*)&m_size, sizeof(m_size) );
-    m_size = be32toh(m_size);
+    uint32_t tmp;
+    is.read( (char*)&tmp, sizeof(tmp) );
+    m_size = be32toh(tmp);
 
     is.read( m_type.buf, sizeof(m_type.buf) );
+    for( size_t i(0); i < sizeof(m_type.buf); ++i ) {
+        if( !isascii( m_type.buf[ i ] ) ) {
+            fprintf(stderr, "ERRTYPE : %02x %02x %02x %02x\n",m_type.buf[ 0 ]&0xff,m_type.buf[ 1 ]&0xff,m_type.buf[ 2 ]&0xff,m_type.buf[ 3 ]&0xff);
+            is.seekg( m_position );
+            throw std::logic_error( "invalid type" );
+        }
+    }
     m_strtype = std::string( m_type.buf, sizeof(m_type.buf) );
+    if( m_size == 1 ) {
+        is.read( (char*)&m_size, sizeof(m_size) );
+        m_size = be64toh(m_size);
+    }
 }
 
 Atom::operator uint32_t() const {
@@ -143,7 +184,7 @@ const char * Atom::str() const {
     return m_strtype.c_str();
 }
 
-uint32_t Atom::size() const {
+uint64_t Atom::size() const {
     return m_size;
 }
 

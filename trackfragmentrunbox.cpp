@@ -20,16 +20,26 @@ TrackFragmentRunBox::Sample::Sample( std::istream &is, uint32_t flags ) : m_trfl
 }
 
 void TrackFragmentRunBox::Sample::fout( std::ostream &out, const Atom * atom ) {
-    out << "\n";
-    atom->indent( out );
-    if( m_trflags & TrackFragmentRunBox::kSampleDurationPresent )
-        out << "duration: " << m_sampleDuration << "; ";
-    if( m_trflags & TrackFragmentRunBox::kSampleSizePresent )
-        out << "size: " << m_sampleSize << "; ";
-    if( m_trflags & TrackFragmentRunBox::kSampleFlagsPresent )
-        out << "flags: " << std::hex << m_sampleFlags << std::dec<< "; ";
-    if( m_trflags & TrackFragmentRunBox::kSampleCompositionTimeOffsetsPresent )
-        out << "time offset: " << m_sampleCompositionTimeOffset << "; ";
+    out << "{";
+    if( m_trflags & TrackFragmentRunBox::kSampleDurationPresent ) {
+        out << m_sampleDuration << ",";
+    }
+    else
+        out << ",";
+    if( m_trflags & TrackFragmentRunBox::kSampleSizePresent ) {
+        out << m_sampleSize << ",";
+    }
+    else
+        out << ",";
+    if( m_trflags & TrackFragmentRunBox::kSampleFlagsPresent ) {
+        out << std::hex << m_sampleFlags << std::dec << ",";
+    }
+    else
+        out << ",";
+    if( m_trflags & TrackFragmentRunBox::kSampleCompositionTimeOffsetsPresent ) {
+        out << m_sampleCompositionTimeOffset;
+    }
+    out << "}";
 }
 
 TrackFragmentRunBox::TrackFragmentRunBox( std::istream& is ) : Atom( is ){
@@ -63,7 +73,7 @@ void TrackFragmentRunBox::fout( std::ostream &out ) const {
     if( m_flags & TrackFragmentRunBox::kFirstSampleFlagsPresent )
         out << " first sample flags: " << std::hex << m_firstSampleFlags << std::dec;
 
-    out << " samples (" << m_sampleCount << "):";
+    out << " samples " << m_sampleCount << " {duration,size,flags,timeoffset}: ";
     for( auto sample: m_samples )
         sample.fout( out, this );
 }

@@ -22,5 +22,9 @@ SampleSizeBox::SampleSizeBox( std::istream& is ) : Atom( is ) {
 void SampleSizeBox::fout( std::ostream &out ) const {
     Atom::fout( out );
     out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;
-    out << " samplesize=" << m_samplesize << " samplecount=" << m_samplecount;
+    out << " samplesize=" << m_samplesize << " samplecount=" << m_samplecount << " { ";
+    for( uint32_t i(0); i < m_samplecount; ++i ) {
+        out << m_entrysizeVector[i] << " ";
+    }
+    out << "}";
 }

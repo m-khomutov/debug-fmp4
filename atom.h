@@ -10,8 +10,6 @@
 #include <memory>
 
 class TrackFragmentRunBox;
-using TrunMap = class std::map<unsigned int, std::shared_ptr<TrackFragmentRunBox> >;
-
 class Atom {
 public:
     enum Value {
@@ -32,6 +30,9 @@ public:
         mdia = 0x6169646d,
         mdhd = 0x6468646d,
         hdlr = 0x726c6468,
+        vide = 0x65646976,
+        soun = 0x6e756f73,
+        text = 0x74786574,
         minf = 0x666e696d,
         vmhd = 0x64686d76,
         smhd = 0x64686d73,
@@ -44,14 +45,18 @@ public:
         stsd = 0x64737473,
         avc1 = 0x31637661,
         avcc = 0x43637661,
+        pasp = 0x70736170,
+        fiel = 0x6c656966,
         hev1 = 0x31766568,
         hvcc = 0x43637668,
         mp4a = 0x6134706d,
+        tx3g = 0x67337874,
         esds = 0x73647365,
         stsz = 0x7a737473,
         stsc = 0x63737473,
         mehd = 0x6468656d,
         stco = 0x6f637473,
+        co64 = 0x34366f63,
         mvex = 0x7865766d,
         trex = 0x78657274,
         uuid = 0x64697575,
@@ -60,8 +65,10 @@ public:
         traf = 0x66617274,
         tfhd = 0x64686674,
         trun = 0x6e757274,
-        udta = 0x61746475
+        udta = 0x61746475,
+        iods = 0x73646f69
     };
+    using TrunMap = class std::map<Atom::Value, std::shared_ptr<TrackFragmentRunBox> >;
 
     static Atom * make( std::istream & is, const TrunMap & trunMap );
 
@@ -73,7 +80,7 @@ public:
 
     const char * str() const;
 
-    uint32_t size() const;
+    uint64_t size() const;
     std::streampos position() const;
     bool container() const;
 
@@ -91,7 +98,7 @@ private:
         char buf[sizeof(uint32_t)];
     } m_type;
     std::string m_strtype;
-    uint32_t m_size;
+    uint64_t m_size;
     std::streampos m_position;
     int m_indent {0};
 

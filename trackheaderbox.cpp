@@ -49,6 +49,10 @@ TrackHeaderBox::TrackHeaderBox( std::istream & is, uint32_t sz ) : Atom( is ) {
     m_height = be32toh( tmp );
 }
 
+uint32_t TrackHeaderBox::trackId() const {
+    return m_trackID;
+}
+
 void TrackHeaderBox::fout( std::ostream &out ) const {
     Atom::fout( out );
     out << "version=" << int(m_version) << " flags=" << std::hex << m_flags << std::dec;

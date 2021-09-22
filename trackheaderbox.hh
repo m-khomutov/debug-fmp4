@@ -7,6 +7,8 @@ class TrackHeaderBox : public Atom {
 public:
     TrackHeaderBox( std::istream & is, uint32_t sz );
 
+    uint32_t trackId() const;
+
 private:
     uint8_t m_version;
     uint32_t m_flags;

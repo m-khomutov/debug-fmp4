@@ -1,4 +1,5 @@
 #include "sampledescriptionbox.hh"
+#include <iostream>
 
 SampleEntry::SampleEntry( std::istream& is, const std::string & fmt ) : Atom( is ), m_format( fmt ) {
     for( int i(0); i < 6; ++i )  //  unsigned int(8)[6] reserved = 0;
@@ -8,6 +9,7 @@ SampleEntry::SampleEntry( std::istream& is, const std::string & fmt ) : Atom( is
 }
 
 void SampleEntry::fout( std::ostream& out ) const {
+    out << "   ";
     Atom::fout( out );
     out << "format='" << m_format << "' data reference index=" << m_dataReferenceIndex;
 }
@@ -85,6 +87,91 @@ void AudioSampleEntry::fout( std::ostream& out ) const {
 }
 
 
+TimedTextSampleEntry::FontTableBox::FontTableBox(std::istream &f)
+: Atom( f ) {
+    uint16_t count;
+    f.read( (char*)&count, sizeof(count) );
+    count = be16toh( count );
+
+    if( count ) {
+        m_fontEntries.resize( count );
+        for( uint16_t i(0); i < count; ++i ) {
+            f.read( (char*)&m_fontEntries[i].fontID, sizeof(m_fontEntries[i].fontID) );
+            m_fontEntries[i].fontID = be16toh( m_fontEntries[i].fontID );
+            m_fontEntries[i].font.resize( f.get() );
+            f.read( &m_fontEntries[i].font[0], m_fontEntries[i].font.size() );
+        }
+    }
+}
+void TimedTextSampleEntry::FontTableBox::fout( std::ostream &out ) const {
+    Atom::fout( out );
+    out << " entries=[ ";
+    for( auto entry : m_fontEntries )
+        out << "{ " << "id=" << entry.fontID << ": " << entry.font << " }";
+    out << " ]";
+}
+
+TimedTextSampleEntry::TimedTextSampleEntry( std::istream& is ) : SampleEntry( is, "text" ) {
+    is.read( (char*)&m_displayFlags, sizeof(m_displayFlags) );
+    m_horizontalJustification = is.get();
+    m_verticalJustification = is.get();
+    is.read( (char*)m_backgroundColorRgba, sizeof(m_backgroundColorRgba) );
+
+    is.read( (char*)&m_defaultTextBox.top, sizeof(m_defaultTextBox.top) );
+    m_defaultTextBox.top = be16toh( m_defaultTextBox.top );
+    is.read( (char*)&m_defaultTextBox.left, sizeof(m_defaultTextBox.left) );
+    m_defaultTextBox.left = be16toh( m_defaultTextBox.left );
+    is.read( (char*)&m_defaultTextBox.bottom, sizeof(m_defaultTextBox.bottom) );
+    m_defaultTextBox.bottom = be16toh( m_defaultTextBox.bottom );
+    is.read( (char*)&m_defaultTextBox.right, sizeof(m_defaultTextBox.right) );
+    m_defaultTextBox.right = be16toh( m_defaultTextBox.right );
+
+    is.read( (char*)&m_defaultStyle.startChar, sizeof(m_defaultStyle.startChar) );
+    m_defaultStyle.startChar = be16toh( m_defaultStyle.startChar );
+    is.read( (char*)&m_defaultStyle.endChar, sizeof(m_defaultStyle.endChar) );
+    m_defaultStyle.endChar = be16toh( m_defaultStyle.endChar );
+    is.read( (char*)&m_defaultStyle.fontID, sizeof(m_defaultStyle.fontID) );
+    m_defaultStyle.fontID = be16toh( m_defaultStyle.fontID );
+
+    m_defaultStyle.face_style_flags = is.get();
+    m_defaultStyle.font_size = is.get();
+    is.read( (char*)&m_defaultStyle.text_color_rgba, sizeof(m_defaultStyle.text_color_rgba) );
+    m_fontTable.reset( new FontTableBox( is ) );
+}
+
+void TimedTextSampleEntry::fout( std::ostream& out ) const {
+  SampleEntry::fout( out );
+  out << " displayFlags=0x" << std::hex << m_displayFlags << std::dec
+      << " horizontal-justification=" << int(m_horizontalJustification)
+      << " vertical-justification=" << int(m_verticalJustification)
+      << " background-color-rgba=[ " << int(m_backgroundColorRgba[0]) << ","
+                                     << int(m_backgroundColorRgba[1]) << ","
+                                     << int(m_backgroundColorRgba[2]) << ","
+                                     << int(m_backgroundColorRgba[3]) << " ]"
+      << " default-text-box=[ " << m_defaultTextBox.top << " "
+                                << m_defaultTextBox.left << " "
+                                << m_defaultTextBox.bottom << " "
+                                << m_defaultTextBox.right << " ]"
+      << " startChar=" << m_defaultStyle.startChar << " endChar=" << m_defaultStyle.endChar
+      << " font-ID=" << m_defaultStyle.fontID << " face-style-flags={";
+      if( m_defaultStyle.face_style_flags == StyleRecord::Style::Plain )
+          out << " plain";
+      if( m_defaultStyle.face_style_flags & StyleRecord::Style::Bold )
+          out << " bold";
+      if( m_defaultStyle.face_style_flags & StyleRecord::Style::Italic )
+          out << " italic";
+      if( m_defaultStyle.face_style_flags & StyleRecord::Style::Underline )
+          out << "underline";
+      out << " } font-size=" << int(m_defaultStyle.font_size) << " text-color-rgba=[ "
+          << int(m_defaultStyle.text_color_rgba[0]) << ","
+          << int(m_defaultStyle.text_color_rgba[1]) << ","
+          << int(m_defaultStyle.text_color_rgba[2]) << ","
+          << int(m_defaultStyle.text_color_rgba[3]) << " ]";
+      if( m_fontTable.get() )
+          out << " FontTableBox={ " << *m_fontTable << " }";
+}
+
+
 
 std::ostream & operator <<( std::ostream& out, const SampleDescriptionBox& stsd ) {
    return out;
@@ -109,6 +196,9 @@ SampleDescriptionBox::SampleDescriptionBox( std::istream& is, const std::string&
         }
         else if( handler_type == "hint" ) {
             m_entries.push_back( std::shared_ptr< SampleEntry >(new HintSampleEntry( is )) );
+        }
+        else if( handler_type == "text" ) {
+            m_entries.push_back( std::shared_ptr< SampleEntry >(new TimedTextSampleEntry( is )) );
         }
     }
 }

@@ -3,9 +3,8 @@
 MovieHeaderBox::MovieHeaderBox( std::istream & is, uint32_t sz ) : Atom( is ) {
     uint32_t tmp;
     is.read( (char*)&tmp, sizeof(tmp) );
-
-    m_version = tmp >> 24;
-    m_flags = tmp & 0xffffff;
+    m_version = tmp & 0xff;
+    m_flags = tmp >> 24;
 
     if( m_version == 1 ) {
         is.read( (char*)&m_creationTime, sizeof(m_creationTime) );

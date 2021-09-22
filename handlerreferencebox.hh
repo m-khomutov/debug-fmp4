@@ -7,15 +7,16 @@ class HandlerReferenceBox : public Atom {
 public:
     HandlerReferenceBox( std::istream & is, std::string * type );
 
-    const std::string& type() const {
-        return m_handlerType;
+    Atom::Value type() const {
+        return m_type;
     }
 
 private:
     uint8_t m_version;
     uint32_t m_flags;
 
-    std::string m_handlerType;
+    Atom::Value m_type;
+    std::string m_typeAsString;
     std::string m_name;
 
 private:

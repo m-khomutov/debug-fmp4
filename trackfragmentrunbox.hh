@@ -55,12 +55,20 @@ public:
         return m_samples[at];
     }
 
-    const std::vector< Sample >::iterator begin() {
+    std::vector< Sample >::iterator begin() {
         return m_samples.begin();
     }
 
-    const std::vector< Sample >::iterator end() {
+    const std::vector< Sample >::const_iterator cbegin() const {
+        return m_samples.cbegin();
+    }
+
+    std::vector< Sample >::iterator end() {
         return m_samples.end();
+    }
+
+    const std::vector< Sample >::const_iterator cend() const {
+        return m_samples.cend();
     }
 
     uint32_t dataoffset() const {
