@@ -8,22 +8,23 @@ SampleEntry::SampleEntry( std::istream& is, const std::string & fmt ) : Atom( is
 }
 
 void SampleEntry::fout( std::ostream& out ) const {
-    out << "size=" << size() << " format='" << m_format << "' data reference index=" << m_dataReferenceIndex;
+    Atom::fout( out );
+    out << "format='" << m_format << "' data reference index=" << m_dataReferenceIndex;
 }
 
 HintSampleEntry::HintSampleEntry( std::istream& is ) : SampleEntry( is, "hint" ) {
 
-    m_data.resize( size() - 2 * sizeof(uint32_t) );
+    m_data.resize( size() - (2 * sizeof(uint32_t) + /*SampleEntry fields*/8) );
     is.read( (char*)m_data.data(), m_data.size() );
 }
 
 void HintSampleEntry::fout( std::ostream& out ) const {
     SampleEntry::fout( out );
 
-    out << std::hex;
+    out << std::hex << " data=[ ";
     for( auto b : m_data )
-        out << b << " ";
-    out << std::dec;
+        out << int(b) << " ";
+    out << std::dec << "]";
 }
 
 VisualSampleEntry::VisualSampleEntry( std::istream& is ) : SampleEntry ( is, "vide" ) {
