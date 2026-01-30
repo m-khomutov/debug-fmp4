@@ -6,6 +6,7 @@
 #define DEBUG_MP4_HVCCBOX_HH
 
 #include "atom.h"
+#include <array>
 #include <vector>
 
 class HvcCBox : public Atom {
