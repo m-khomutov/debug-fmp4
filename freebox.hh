@@ -16,6 +16,7 @@ private:
 
 private:
     void fout( std::ostream& out ) const override;
+    bool is_container( std::istream & f );
 };
 
 

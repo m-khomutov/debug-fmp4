@@ -102,6 +102,8 @@ private:
     std::streampos m_position;
     int m_indent {0};
 
+    bool isascii_ext( char c ) const;
+
     friend std::ostream & operator <<( std::ostream& out, const Atom& atom );
 };
 

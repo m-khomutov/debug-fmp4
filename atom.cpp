@@ -163,7 +163,7 @@ Atom::Atom( std::istream& is ) {
 
     is.read( m_type.buf, sizeof(m_type.buf) );
     for( size_t i(0); i < sizeof(m_type.buf); ++i ) {
-        if( !isascii( m_type.buf[ i ] ) ) {
+        if( !isascii_ext( m_type.buf[ i ] ) ) {
             fprintf(stderr, "ERRTYPE : %02x %02x %02x %02x\n",m_type.buf[ 0 ]&0xff,m_type.buf[ 1 ]&0xff,m_type.buf[ 2 ]&0xff,m_type.buf[ 3 ]&0xff);
             is.seekg( m_position );
             throw std::logic_error( "invalid type" );
@@ -226,4 +226,10 @@ void Atom::ctime( std::ostream & out, time_t t ) const {
 
     out << tp->tm_mday << "/" << tp->tm_mon+1 << "/" << tp->tm_year << " "
         << tp->tm_hour << ":" << tp->tm_min << ":" << tp->tm_sec;
+}
+
+bool Atom::isascii_ext( char c ) const {
+    if( isascii( c ) )
+        return true;
+    return (c & 0xFF) == 0xA9;
 }
